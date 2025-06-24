@@ -1,1 +1,1 @@
-Layout actividad escolar
+Landing actividad escolar
