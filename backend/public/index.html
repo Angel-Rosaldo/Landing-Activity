@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeAcademy Pro - Aprende a Programar</title>
+    <!-- Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
         * {
             margin: 0;
@@ -328,6 +330,18 @@
                     <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos sobre tus objetivos de aprendizaje..." required></textarea>
                 </div>
 
+                <!-- Google reCAPTCHA -->
+                <div class="form-group">
+                    <div class="g-recaptcha" data-sitekey="6Lf7020rAAAAANgfWbD4ZJ3Qw2O6JKngdU6vy0A0" data-theme="dark"></div>
+                </div>
+
+                <div class="form-group">
+  <label>
+    <input type="checkbox" id="terminos" required>
+    Acepto los <a href="/terminos.html" target="_blank">términos y condiciones</a>.
+  </label>
+</div>
+
                 <button type="submit" class="submit-btn">Enviar Mensaje</button>
             </form>
         </div>
@@ -354,11 +368,21 @@
         document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            // Verificar reCAPTCHA
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                const messageContainer = document.getElementById('messageContainer');
+                messageContainer.innerHTML = '<div class="message error">Por favor, completa el reCAPTCHA.</div>';
+                return;
+            }
+            
             const formData = {
                 nombre: document.getElementById('nombre').value,
                 correo: document.getElementById('correo').value,
                 telefono: document.getElementById('telefono').value,
-                mensaje: document.getElementById('mensaje').value
+                mensaje: document.getElementById('mensaje').value,
+                terminos: document.getElementById('terminos').checked,
+                recaptcha: recaptchaResponse
             };
 
             const messageContainer = document.getElementById('messageContainer');
@@ -382,11 +406,14 @@
                 if (response.ok) {
                     messageContainer.innerHTML = '<div class="message success">¡Mensaje enviado exitosamente! Te contactaremos pronto.</div>';
                     document.getElementById('contactForm').reset();
+                    grecaptcha.reset(); // Reset reCAPTCHA
                 } else {
                     messageContainer.innerHTML = `<div class="message error">Error: ${result.error}</div>`;
+                    grecaptcha.reset(); // Reset reCAPTCHA on error
                 }
             } catch (error) {
                 messageContainer.innerHTML = '<div class="message error">Error de conexión. Por favor, inténtalo de nuevo.</div>';
+                grecaptcha.reset(); // Reset reCAPTCHA on error
             }
 
             // Re-enable button
